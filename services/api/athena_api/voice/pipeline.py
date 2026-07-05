@@ -34,7 +34,47 @@ class TTSProvider(ABC):
         ...
 
 
-# TODO(cursor): FasterWhisperSTT(STTProvider) — lazy-load model on first use.
+class FasterWhisperSTT(STTProvider):
+    """Local Whisper via faster-whisper (CTranslate2). CPU int8 by default.
+
+    The model is loaded lazily on the first transcribe call and cached for
+    the process lifetime. First call downloads the model (~150 MB for
+    `base`) to the Hugging Face cache; subsequent calls are offline.
+    """
+
+    def __init__(self, model_size: str = "base") -> None:
+        self.model_size = model_size
+        self._model = None
+
+    def _load(self):
+        if self._model is None:
+            from faster_whisper import WhisperModel
+
+            self._model = WhisperModel(
+                self.model_size, device="cpu", compute_type="int8",
+            )
+        return self._model
+
+    def transcribe(self, audio_bytes: bytes, sample_rate: int = 16000) -> str:
+        import io
+
+        model = self._load()
+        # faster-whisper decodes webm/opus/wav/etc. itself via PyAV.
+        segments, _info = model.transcribe(io.BytesIO(audio_bytes), beam_size=1)
+        return " ".join(seg.text.strip() for seg in segments).strip()
+
+
+_stt_singleton: FasterWhisperSTT | None = None
+
+
+def get_stt() -> FasterWhisperSTT:
+    """Process-wide STT instance so the model loads once."""
+    global _stt_singleton
+    if _stt_singleton is None:
+        _stt_singleton = FasterWhisperSTT()
+    return _stt_singleton
+
+
 # TODO(cursor): PiperTTS(TTSProvider) — subprocess to piper.exe with a voice model.
 # TODO(cursor): ElevenLabsTTS(TTSProvider) — network_access permission, API key from env.
 # TODO(cursor): WakeWordListener — openwakeword loop, logs detections for the

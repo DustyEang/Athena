@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatEvent, ModelOption, RoutingEvent, ToolActivity, ToolRun, Usage } from "@shared/types";
 import Orb from "../components/Orb";
-import { api, streamChat } from "../lib/api";
+import { api, streamChat, transcribeAudio } from "../lib/api";
 import { useAppStore } from "../lib/store";
 
 interface UiMessage {
@@ -39,10 +39,17 @@ export default function ChatView() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [premiumPrompt, setPremiumPrompt] = useState<{ message: string; model: string } | null>(null);
   const [toolRuns, setToolRuns] = useState<ToolRun[]>([]);
+  const [voiceReady, setVoiceReady] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.models().then(setModels).catch(() => {});
+    api.voiceStatus().then((s) => setVoiceReady(!!s.stt?.available)).catch(() => {});
     const t = setInterval(() => api.toolRuns().then(setToolRuns).catch(() => {}), 5000);
     api.toolRuns().then(setToolRuns).catch(() => {});
     return () => clearInterval(t);
@@ -114,6 +121,48 @@ export default function ChatView() {
     },
     [busy, conversationId, activeWorkspaceId, modelOverride, setOrbState],
   );
+
+  const startRecording = useCallback(async () => {
+    if (recording || transcribing || busy) return;
+    setVoiceError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const rec = new MediaRecorder(stream);
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      rec.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setOrbState("thinking");
+        setTranscribing(true);
+        try {
+          const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+          if (blob.size > 0) {
+            const text = await transcribeAudio(blob);
+            if (text) setInput((prev) => (prev ? `${prev} ${text}` : text));
+          }
+        } catch (err) {
+          setVoiceError(String(err));
+        } finally {
+          setTranscribing(false);
+          setOrbState("idle");
+        }
+      };
+      rec.start();
+      recorderRef.current = rec;
+      setRecording(true);
+      setOrbState("listening");
+    } catch {
+      setVoiceError("Microphone access denied — allow the mic in your browser and try again.");
+    }
+  }, [recording, transcribing, busy, setOrbState]);
+
+  const stopRecording = useCallback(() => {
+    const rec = recorderRef.current;
+    if (rec && rec.state !== "inactive") rec.stop();
+    setRecording(false);
+  }, []);
 
   const pending = toolRuns.filter((r) => r.status === "pending_confirmation");
 
@@ -293,14 +342,40 @@ export default function ChatView() {
             </button>
             <button
               type="button"
-              title="Push-to-talk (voice pipeline not configured yet — see Settings → Voice)"
-              className="rounded-xl border px-4 py-3 text-sm opacity-50"
-              style={{ borderColor: "var(--athena-border)" }}
-              onClick={() => alert("Voice is not configured yet. See docs/VOICE.md for setup.")}
+              title={
+                !voiceReady
+                  ? "Voice not configured — install faster-whisper (see docs/VOICE.md)"
+                  : recording
+                    ? "Release to transcribe"
+                    : "Hold to talk"
+              }
+              disabled={!voiceReady || busy || transcribing}
+              onMouseDown={startRecording}
+              onMouseUp={stopRecording}
+              onMouseLeave={() => recording && stopRecording()}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                startRecording();
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                stopRecording();
+              }}
+              className="rounded-xl border px-4 py-3 text-sm select-none disabled:opacity-40"
+              style={{
+                borderColor: recording ? "var(--athena-danger)" : "var(--athena-border)",
+                background: recording ? "rgba(248,113,113,0.15)" : "transparent",
+                opacity: voiceReady ? 1 : 0.5,
+              }}
             >
-              🎙
+              {transcribing ? "⏳" : recording ? "🔴" : "🎙"}
             </button>
           </form>
+          {voiceError && (
+            <div className="mt-2 text-xs" style={{ color: "var(--athena-danger)" }}>
+              ⚠ {voiceError}
+            </div>
+          )}
         </div>
       </div>
 

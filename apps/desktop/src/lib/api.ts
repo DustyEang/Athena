@@ -73,7 +73,23 @@ export const api = {
     http<ToolRun>(`/tools/confirm/${runId}`, {
       method: "POST", body: JSON.stringify({ approved }),
     }),
+
+  // voice
+  voiceStatus: () => http<Record<string, any>>("/voice/status"),
 };
+
+/** Push-to-talk: send recorded audio, get the transcript back. */
+export async function transcribeAudio(blob: Blob): Promise<string> {
+  const form = new FormData();
+  form.append("audio", blob, "recording.webm");
+  const res = await fetch(`${API_BASE}/voice/transcribe`, { method: "POST", body: form });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Transcription failed (${res.status}): ${body.slice(0, 200)}`);
+  }
+  const data = (await res.json()) as { text: string };
+  return data.text;
+}
 
 /** Stream a chat message; invokes onEvent for every SSE event. */
 export async function streamChat(
