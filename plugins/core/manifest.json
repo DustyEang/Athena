@@ -1,0 +1,39 @@
+{
+  "name": "core",
+  "display_name": "Core Tools",
+  "description": "Built-in essentials: notes, app launcher, and a test echo tool.",
+  "version": "0.1.0",
+  "enabled": true,
+  "permission": "read_only",
+  "settings": {},
+  "tools": [
+    {
+      "name": "echo",
+      "description": "Test tool — echoes its input. Useful for verifying the tool pipeline.",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "text": { "type": "string" } } },
+      "output_schema": { "type": "object", "properties": { "echo": { "type": "string" } } }
+    },
+    {
+      "name": "add_note",
+      "description": "Save a quick note into Athena's memory (category: notes).",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "text": { "type": "string" }, "workspace_id": { "type": "string" } }, "required": ["text"] },
+      "output_schema": { "type": "object", "properties": { "id": { "type": "string" } } }
+    },
+    {
+      "name": "list_notes",
+      "description": "List saved notes.",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "limit": { "type": "integer" } } },
+      "output_schema": { "type": "object", "properties": { "notes": { "type": "array" } } }
+    },
+    {
+      "name": "launch_app",
+      "description": "Launch an allowlisted Windows application. Requires user confirmation.",
+      "permission": "system_sensitive",
+      "input_schema": { "type": "object", "properties": { "app": { "type": "string" } }, "required": ["app"] },
+      "output_schema": { "type": "object", "properties": { "launched": { "type": "string" } } }
+    }
+  ]
+}

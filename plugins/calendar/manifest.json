@@ -1,0 +1,15 @@
+{
+  "name": "calendar",
+  "display_name": "Google Calendar",
+  "description": "Placeholder — calendar integration (read schedule, create events). Modifying the calendar is system_sensitive and always confirmed.",
+  "version": "0.1.0",
+  "enabled": false,
+  "placeholder": true,
+  "permission": "network_access",
+  "settings": { "oauth_client_id": "", "calendar_id": "primary" },
+  "tools": [
+    { "name": "today", "description": "Today's schedule.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "upcoming", "description": "Upcoming events.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "create_event", "description": "Create an event — always requires confirmation.", "permission": "system_sensitive", "input_schema": {}, "output_schema": {} }
+  ]
+}

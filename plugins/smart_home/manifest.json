@@ -1,0 +1,14 @@
+{
+  "name": "smart_home",
+  "display_name": "Smart Home",
+  "description": "Placeholder — smart home control (Home Assistant is the intended integration point).",
+  "version": "0.1.0",
+  "enabled": false,
+  "placeholder": true,
+  "permission": "network_access",
+  "settings": { "home_assistant_url": "", "token": "" },
+  "tools": [
+    { "name": "device_states", "description": "Read device states.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "run_scene", "description": "Trigger a scene/automation — requires confirmation.", "permission": "system_sensitive", "input_schema": {}, "output_schema": {} }
+  ]
+}

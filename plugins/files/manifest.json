@@ -1,0 +1,53 @@
+{
+  "name": "files",
+  "display_name": "File Tools",
+  "description": "Read, search, and summarize files inside user-granted folders. Writes and deletes always require confirmation.",
+  "version": "0.1.0",
+  "enabled": true,
+  "permission": "read_only",
+  "settings": {},
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a text file inside a granted folder.",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "path": { "type": "string" } }, "required": ["path"] },
+      "output_schema": { "type": "object", "properties": { "content": { "type": "string" } } }
+    },
+    {
+      "name": "search_folder",
+      "description": "Full-text search across indexed granted folders.",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "query": { "type": "string" } }, "required": ["query"] },
+      "output_schema": { "type": "object", "properties": { "hits": { "type": "array" } } }
+    },
+    {
+      "name": "summarize_document",
+      "description": "Summarize a text file (extractive v1; model-powered later).",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "path": { "type": "string" } }, "required": ["path"] },
+      "output_schema": { "type": "object", "properties": { "summary": { "type": "string" } } }
+    },
+    {
+      "name": "compare_files",
+      "description": "Line-level diff between two text files in granted folders.",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "path_a": { "type": "string" }, "path_b": { "type": "string" } }, "required": ["path_a", "path_b"] },
+      "output_schema": { "type": "object", "properties": { "diff": { "type": "string" } } }
+    },
+    {
+      "name": "write_file",
+      "description": "Write/overwrite a text file inside a granted folder. Requires user confirmation.",
+      "permission": "user_confirmed_write",
+      "input_schema": { "type": "object", "properties": { "path": { "type": "string" }, "content": { "type": "string" } }, "required": ["path", "content"] },
+      "output_schema": { "type": "object", "properties": { "written": { "type": "string" } } }
+    },
+    {
+      "name": "delete_file",
+      "description": "Delete a file inside a granted folder. Requires user confirmation.",
+      "permission": "user_confirmed_write",
+      "input_schema": { "type": "object", "properties": { "path": { "type": "string" } }, "required": ["path"] },
+      "output_schema": { "type": "object", "properties": { "deleted": { "type": "string" } } }
+    }
+  ]
+}

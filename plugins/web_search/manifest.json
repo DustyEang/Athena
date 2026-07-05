@@ -1,0 +1,14 @@
+{
+  "name": "web_search",
+  "display_name": "Web Search",
+  "description": "Placeholder — web search provider (SearXNG local, Brave/Tavily API, or similar). Network access requires confirmation once implemented.",
+  "version": "0.1.0",
+  "enabled": false,
+  "placeholder": true,
+  "permission": "network_access",
+  "settings": { "provider": "", "api_key": "" },
+  "tools": [
+    { "name": "search", "description": "Search the web and return ranked results.", "permission": "network_access", "input_schema": { "type": "object", "properties": { "query": { "type": "string" } } }, "output_schema": {} },
+    { "name": "fetch_page", "description": "Fetch and extract readable text from a URL.", "permission": "network_access", "input_schema": { "type": "object", "properties": { "url": { "type": "string" } } }, "output_schema": {} }
+  ]
+}

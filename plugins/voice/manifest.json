@@ -1,0 +1,21 @@
+{
+  "name": "voice",
+  "display_name": "Voice Tools",
+  "description": "Voice pipeline controls (push-to-talk, wake word, TTS). Placeholder — the pipeline lives in services/api/athena_api/voice/; these tools activate once STT/TTS providers are installed (see docs/VOICE.md).",
+  "version": "0.1.0",
+  "enabled": true,
+  "placeholder": true,
+  "permission": "read_only",
+  "settings": {
+    "wake_word": "Athena",
+    "voice_personality": "calm, capable, slightly otherworldly",
+    "audio_input_device": "default",
+    "audio_output_device": "default"
+  },
+  "tools": [
+    { "name": "start_listening", "description": "Begin push-to-talk capture.", "permission": "read_only", "input_schema": {}, "output_schema": {} },
+    { "name": "stop_listening", "description": "Stop capture and transcribe.", "permission": "read_only", "input_schema": {}, "output_schema": {} },
+    { "name": "speak", "description": "Speak text aloud via local TTS.", "permission": "read_only", "input_schema": { "type": "object", "properties": { "text": { "type": "string" } } }, "output_schema": {} },
+    { "name": "wake_word_log", "description": "Wake-word reliability log (detections, false positives).", "permission": "read_only", "input_schema": {}, "output_schema": {} }
+  ]
+}

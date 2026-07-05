@@ -1,0 +1,9 @@
+# Athena API — minimal, reliable dependency set.
+# Optional extras (voice, vector DB) are documented in docs/SETUP.md and
+# detected at runtime; the app runs without them.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.8
+pydantic-settings>=2.4
+httpx>=0.27
+python-dotenv>=1.0

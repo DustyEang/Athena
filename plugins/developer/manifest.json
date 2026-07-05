@@ -1,0 +1,46 @@
+{
+  "name": "developer",
+  "display_name": "Developer Tools",
+  "description": "Repo introspection: git status/diff, file tree, code search. Command runner exists but is disabled by default.",
+  "version": "0.1.0",
+  "enabled": true,
+  "permission": "read_only",
+  "settings": {},
+  "tools": [
+    {
+      "name": "git_status",
+      "description": "git status of a granted repo folder.",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "path": { "type": "string" } }, "required": ["path"] },
+      "output_schema": { "type": "object", "properties": { "status": { "type": "string" } } }
+    },
+    {
+      "name": "git_diff",
+      "description": "git diff of a granted repo folder.",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "path": { "type": "string" } }, "required": ["path"] },
+      "output_schema": { "type": "object", "properties": { "diff": { "type": "string" } } }
+    },
+    {
+      "name": "repo_tree",
+      "description": "Directory tree of a granted folder (skips node_modules etc).",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "path": { "type": "string" }, "max_depth": { "type": "integer" } }, "required": ["path"] },
+      "output_schema": { "type": "object", "properties": { "tree": { "type": "string" } } }
+    },
+    {
+      "name": "code_search",
+      "description": "Substring search across code files in a granted folder.",
+      "permission": "read_only",
+      "input_schema": { "type": "object", "properties": { "path": { "type": "string" }, "query": { "type": "string" } }, "required": ["path", "query"] },
+      "output_schema": { "type": "object", "properties": { "matches": { "type": "array" } } }
+    },
+    {
+      "name": "run_command",
+      "description": "Run a shell command in a granted folder. DISABLED by default; enable consciously in plugin settings. Always requires confirmation.",
+      "permission": "disabled",
+      "input_schema": { "type": "object", "properties": { "path": { "type": "string" }, "command": { "type": "string" } }, "required": ["path", "command"] },
+      "output_schema": { "type": "object", "properties": { "stdout": { "type": "string" }, "stderr": { "type": "string" }, "exit_code": { "type": "integer" } } }
+    }
+  ]
+}

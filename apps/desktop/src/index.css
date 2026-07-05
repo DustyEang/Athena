@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* ---------- Athena theme: deep-space command center ---------- */
+:root {
+  --athena-bg: #060913;
+  --athena-panel: #0b1120;
+  --athena-panel-2: #101a30;
+  --athena-border: #1c2a44;
+  --athena-text: #d7e2f4;
+  --athena-dim: #7d8fb0;
+  --athena-core: #38bdf8;      /* local / Athena blue */
+  --athena-premium: #a78bfa;   /* premium violet */
+  --athena-tool: #fbbf24;      /* tool amber */
+  --athena-danger: #f87171;
+}
+
+html, body, #root { height: 100%; }
+body {
+  background: radial-gradient(1200px 800px at 70% -10%, #0c1730 0%, var(--athena-bg) 55%);
+  color: var(--athena-text);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--athena-border); border-radius: 4px; }
+
+/* ---------- The Orb: Athena's presence ----------
+   Layered construct: rotating iridescent shell, breathing plasma core,
+   drifting inner nebula, outer halo. State classes modulate speed/color:
+   .orb-idle .orb-listening .orb-thinking .orb-speaking                */
+
+.orb {
+  position: relative;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 30%, rgba(190, 235, 255, 0.95) 0%, rgba(56, 189, 248, 0.55) 22%, rgba(23, 78, 166, 0.75) 58%, rgba(6, 16, 40, 0.95) 100%);
+  box-shadow:
+    0 0 24px 4px rgba(56, 189, 248, 0.35),
+    0 0 90px 12px rgba(56, 189, 248, 0.18),
+    inset 0 0 30px 6px rgba(120, 220, 255, 0.25);
+  animation: orb-breathe 5s ease-in-out infinite;
+}
+.orb::before { /* iridescent rotating shell */
+  content: "";
+  position: absolute; inset: -6%;
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg,
+    transparent 0deg, rgba(125, 211, 252, 0.5) 40deg, transparent 90deg,
+    rgba(167, 139, 250, 0.35) 160deg, transparent 220deg,
+    rgba(94, 234, 212, 0.3) 300deg, transparent 360deg);
+  filter: blur(6px);
+  animation: orb-rotate 9s linear infinite;
+}
+.orb::after { /* inner nebula drift */
+  content: "";
+  position: absolute; inset: 12%;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 60% 65%, rgba(167, 139, 250, 0.35) 0%, transparent 45%),
+    radial-gradient(circle at 30% 40%, rgba(94, 234, 212, 0.3) 0%, transparent 50%);
+  mix-blend-mode: screen;
+  animation: orb-drift 12s ease-in-out infinite alternate;
+}
+
+.orb-idle { animation-duration: 6s; }
+.orb-listening {
+  animation-duration: 2.2s;
+  box-shadow:
+    0 0 30px 8px rgba(94, 234, 212, 0.45),
+    0 0 110px 18px rgba(94, 234, 212, 0.2),
+    inset 0 0 34px 8px rgba(150, 255, 235, 0.3);
+}
+.orb-thinking::before { animation-duration: 2.5s; }
+.orb-thinking {
+  animation-duration: 1.6s;
+  box-shadow:
+    0 0 30px 8px rgba(167, 139, 250, 0.5),
+    0 0 110px 18px rgba(167, 139, 250, 0.22),
+    inset 0 0 34px 8px rgba(210, 190, 255, 0.3);
+}
+.orb-speaking { animation: orb-pulse 0.55s ease-in-out infinite; }
+
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.045); }
+}
+@keyframes orb-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+@keyframes orb-rotate {
+  to { transform: rotate(360deg); }
+}
+@keyframes orb-drift {
+  from { transform: rotate(-8deg) scale(1); opacity: 0.8; }
+  to { transform: rotate(14deg) scale(1.08); opacity: 1; }
+}
+
+/* Reduced motion: keep the presence, drop the animation */
+@media (prefers-reduced-motion: reduce) {
+  .orb, .orb::before, .orb::after { animation: none; }
+}

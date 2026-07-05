@@ -1,0 +1,15 @@
+{
+  "name": "server_connector",
+  "display_name": "Athena Server Connector",
+  "description": "Placeholder — connects this desktop Athena to a future online Athena server for heavy inference, background jobs, and multi-device sync (see docs/SERVER_ROADMAP.md).",
+  "version": "0.1.0",
+  "enabled": false,
+  "placeholder": true,
+  "permission": "network_access",
+  "settings": { "server_url": "", "auth": "token stored in env / OS credential manager, never here" },
+  "tools": [
+    { "name": "server_status", "description": "Ping the remote Athena server.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "offload_job", "description": "Send a heavy job (indexing, QA batch) to the server queue.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "sync_memory", "description": "Sync memory across devices via the server.", "permission": "network_access", "input_schema": {}, "output_schema": {} }
+  ]
+}

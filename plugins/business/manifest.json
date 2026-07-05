@@ -1,0 +1,15 @@
+{
+  "name": "business",
+  "display_name": "Business Systems",
+  "description": "Placeholder — ServiceTitan-style business system integrations: jobs, scheduling, customers, dispatch insights.",
+  "version": "0.1.0",
+  "enabled": false,
+  "placeholder": true,
+  "permission": "network_access",
+  "settings": { "system": "", "api_url": "", "api_key": "" },
+  "tools": [
+    { "name": "jobs_today", "description": "Today's jobs/schedule overview.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "customer_lookup", "description": "Look up a customer record.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "ops_summary", "description": "Daily operations summary.", "permission": "network_access", "input_schema": {}, "output_schema": {} }
+  ]
+}

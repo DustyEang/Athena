@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Tauri / Rust
+apps/desktop/src-tauri/target/
+
+# Athena runtime data (never commit user data)
+data/*.db
+data/*.db-*
+data/logs/
+data/index/
+
+# Env / secrets — NEVER commit real keys
+.env
+.env.local
+*.key
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

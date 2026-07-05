@@ -1,0 +1,21 @@
+{
+  "name": "qa_agent",
+  "display_name": "QA Document Review Agent",
+  "description": "Placeholder — bulk document review against SOPs, manufacturer/MC charts, and quality rules: scoring, missing-info detection, analyst reports, audit history. Full architecture in docs/QA_AGENT_ROADMAP.md. Designed to plug into Flow as a module.",
+  "version": "0.1.0",
+  "enabled": false,
+  "placeholder": true,
+  "permission": "read_only",
+  "settings": {
+    "sop_folder": "",
+    "charts_folder": "",
+    "score_threshold": 0.8
+  },
+  "tools": [
+    { "name": "review_document", "description": "Review one document against SOP + chart rules; return score, failed checks, missing info.", "permission": "read_only", "input_schema": { "type": "object", "properties": { "path": { "type": "string" } } }, "output_schema": {} },
+    { "name": "bulk_review", "description": "Queue a batch of documents for review.", "permission": "read_only", "input_schema": {}, "output_schema": {} },
+    { "name": "chart_lookup", "description": "Look up a manufacturer/MC chart entry.", "permission": "read_only", "input_schema": {}, "output_schema": {} },
+    { "name": "generate_report", "description": "Analyst-friendly review report (Excel/PDF export later).", "permission": "read_only", "input_schema": {}, "output_schema": {} },
+    { "name": "audit_history", "description": "Review/audit history for a document set.", "permission": "read_only", "input_schema": {}, "output_schema": {} }
+  ]
+}

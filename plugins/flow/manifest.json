@@ -1,0 +1,26 @@
+{
+  "name": "flow",
+  "display_name": "Flow Integration",
+  "description": "Connector for Flow, the internal operations/project management platform. Placeholder — configure URL + API key, then implement handlers against Flow's API (see docs/FLOW_INTEGRATION.md).",
+  "version": "0.1.0",
+  "enabled": true,
+  "placeholder": true,
+  "permission": "network_access",
+  "settings": {
+    "flow_url": "",
+    "flow_local_dev_url": "http://localhost:3000",
+    "api_key": "",
+    "default_project_id": ""
+  },
+  "tools": [
+    { "name": "open_flow", "description": "Open Flow in the browser.", "permission": "read_only", "input_schema": {}, "output_schema": {} },
+    { "name": "list_projects", "description": "Read Flow project data.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "create_task_idea", "description": "Create a task idea in Flow.", "permission": "network_access", "input_schema": { "type": "object", "properties": { "title": { "type": "string" }, "detail": { "type": "string" } } }, "output_schema": {} },
+    { "name": "capture_bug", "description": "Capture a bug report into Flow.", "permission": "network_access", "input_schema": { "type": "object", "properties": { "title": { "type": "string" }, "detail": { "type": "string" } } }, "output_schema": {} },
+    { "name": "capture_idea", "description": "Capture an employee/team idea (AI idea bubble).", "permission": "network_access", "input_schema": { "type": "object", "properties": { "idea": { "type": "string" } } }, "output_schema": {} },
+    { "name": "team_workload_summary", "description": "Summarize team workload from Flow data.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "upcoming_work_queue", "description": "Show the upcoming work queue.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "generate_roadmap", "description": "Generate a project roadmap from Flow project data.", "permission": "network_access", "input_schema": { "type": "object", "properties": { "project_id": { "type": "string" } } }, "output_schema": {} },
+    { "name": "qa_review_queue", "description": "QA document review workflow hook (see docs/QA_AGENT_ROADMAP.md).", "permission": "network_access", "input_schema": {}, "output_schema": {} }
+  ]
+}

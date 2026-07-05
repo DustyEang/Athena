@@ -1,0 +1,14 @@
+{
+  "name": "athena",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Athena — local-first AI assistant platform (desktop + API + plugins)",
+  "workspaces": [
+    "apps/desktop"
+  ],
+  "scripts": {
+    "dev:desktop": "npm run dev --workspace @athena/desktop",
+    "build:desktop": "npm run build --workspace @athena/desktop",
+    "tauri:dev": "npm run tauri --workspace @athena/desktop -- dev"
+  }
+}

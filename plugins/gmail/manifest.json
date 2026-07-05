@@ -1,0 +1,16 @@
+{
+  "name": "gmail",
+  "display_name": "Gmail",
+  "description": "Placeholder — Gmail integration (read/summarize inbox, draft replies). Sending email is system_sensitive and always confirmed. Needs Google OAuth setup.",
+  "version": "0.1.0",
+  "enabled": false,
+  "placeholder": true,
+  "permission": "network_access",
+  "settings": { "oauth_client_id": "", "account": "" },
+  "tools": [
+    { "name": "list_recent", "description": "List recent emails.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "summarize_inbox", "description": "Summarize unread email.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "draft_reply", "description": "Draft (not send) a reply.", "permission": "network_access", "input_schema": {}, "output_schema": {} },
+    { "name": "send_email", "description": "Send an email — always requires confirmation.", "permission": "system_sensitive", "input_schema": {}, "output_schema": {} }
+  ]
+}
