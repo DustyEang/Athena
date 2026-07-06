@@ -36,13 +36,16 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Athena API", version=__version__, lifespan=lifespan)
 
-# Desktop app origins: Vite dev server + Tauri webview.
+# Desktop app origins: Vite dev server + Tauri webview + phones/tablets on
+# the private network (RFC1918 ranges only — never public origins).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173", "http://127.0.0.1:5173",
-        "tauri://localhost", "http://tauri.localhost",
-    ],
+    allow_origins=["tauri://localhost", "http://tauri.localhost"],
+    allow_origin_regex=(
+        r"http://(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}"
+        r"|10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+        r"|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?"
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

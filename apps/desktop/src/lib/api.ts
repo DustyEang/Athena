@@ -4,7 +4,9 @@ import type {
   ToolRun, Workspace,
 } from "@shared/types";
 
-export const API_BASE = "http://127.0.0.1:8765/api";
+// Follow the page's host so the app works from localhost AND from phones
+// on the same network (the backend listens on 0.0.0.0:8765).
+export const API_BASE = `http://${window.location.hostname || "127.0.0.1"}:8765/api`;
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {

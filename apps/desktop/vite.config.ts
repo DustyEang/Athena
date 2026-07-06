@@ -11,7 +11,7 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "../../packages/shared/src"),
     },
   },
-  server: { port: 5173, strictPort: true },
+  server: { port: 5173, strictPort: true, host: true }, // host: true → reachable from phones on the same network
   // Tauri expects a fixed dist dir
   build: { outDir: "dist", emptyOutDir: true },
 });
