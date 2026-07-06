@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatEvent, ModelOption, RoutingEvent, ToolActivity, ToolRun, Usage } from "@shared/types";
 import Orb from "../components/Orb";
-import { api, streamChat, transcribeAudio } from "../lib/api";
+import { api, speakText, streamChat, transcribeAudio } from "../lib/api";
 import { useAppStore } from "../lib/store";
 
 interface UiMessage {
@@ -40,16 +40,24 @@ export default function ChatView() {
   const [premiumPrompt, setPremiumPrompt] = useState<{ message: string; model: string } | null>(null);
   const [toolRuns, setToolRuns] = useState<ToolRun[]>([]);
   const [voiceReady, setVoiceReady] = useState(false);
+  const [ttsReady, setTtsReady] = useState(false);
+  const [voiceReplies, setVoiceReplies] = useState(
+    () => localStorage.getItem("athena.voiceReplies") !== "off",
+  );
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.models().then(setModels).catch(() => {});
-    api.voiceStatus().then((s) => setVoiceReady(!!s.stt?.available)).catch(() => {});
+    api.voiceStatus().then((s) => {
+      setVoiceReady(!!s.stt?.available);
+      setTtsReady(!!s.tts?.available);
+    }).catch(() => {});
     const t = setInterval(() => api.toolRuns().then(setToolRuns).catch(() => {}), 5000);
     api.toolRuns().then(setToolRuns).catch(() => {});
     return () => clearInterval(t);
@@ -58,6 +66,24 @@ export default function ChatView() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [messages]);
+
+  const speakReply = useCallback(async (text: string) => {
+    if (!text.trim()) return;
+    try {
+      const blob = await speakText(text);
+      audioRef.current?.pause();
+      const audio = new Audio(URL.createObjectURL(blob));
+      audioRef.current = audio;
+      setOrbState("speaking");
+      audio.onended = audio.onerror = () => {
+        URL.revokeObjectURL(audio.src);
+        setOrbState("idle");
+      };
+      await audio.play();
+    } catch {
+      setOrbState("idle"); // voice is never mandatory — degrade silently to text
+    }
+  }, [setOrbState]);
 
   const send = useCallback(
     async (text: string, confirmPremium = false) => {
@@ -70,6 +96,7 @@ export default function ChatView() {
       const update = (fn: (last: UiMessage) => UiMessage) =>
         setMessages((m) => [...m.slice(0, -1), fn(m[m.length - 1])]);
 
+      let reply = "";
       try {
         await streamChat(
           {
@@ -89,6 +116,7 @@ export default function ChatView() {
               setPremiumPrompt({ message: text, model: e.model });
             } else if (e.type === "delta") {
               setOrbState("speaking");
+              reply += e.text;
               update((last) => ({ ...last, content: last.content + e.text }));
             } else if (e.type === "tool_call") {
               setOrbState("thinking");
@@ -117,9 +145,11 @@ export default function ChatView() {
       } finally {
         setBusy(false);
         setOrbState("idle");
+        if (voiceReplies && ttsReady && reply) void speakReply(reply);
       }
     },
-    [busy, conversationId, activeWorkspaceId, modelOverride, setOrbState],
+    [busy, conversationId, activeWorkspaceId, modelOverride, setOrbState,
+     voiceReplies, ttsReady, speakReply],
   );
 
   const startRecording = useCallback(async () => {
@@ -176,6 +206,28 @@ export default function ChatView() {
         >
           <Orb state={orbState} size={44} />
           <div className="flex items-center gap-2 text-xs">
+            {ttsReady && (
+              <button
+                type="button"
+                title={voiceReplies ? "Voice replies on — click to mute" : "Voice replies off — click to unmute"}
+                onClick={() => {
+                  const next = !voiceReplies;
+                  setVoiceReplies(next);
+                  localStorage.setItem("athena.voiceReplies", next ? "on" : "off");
+                  if (!next) {
+                    audioRef.current?.pause();
+                    setOrbState("idle");
+                  }
+                }}
+                className="rounded-md border px-2 py-1.5"
+                style={{
+                  borderColor: voiceReplies ? "var(--athena-core)" : "var(--athena-border)",
+                  opacity: voiceReplies ? 1 : 0.5,
+                }}
+              >
+                {voiceReplies ? "🔊" : "🔇"}
+              </button>
+            )}
             <span style={{ color: "var(--athena-dim)" }}>Model</span>
             <select
               value={modelOverride}

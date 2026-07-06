@@ -90,10 +90,18 @@ async def route_request(
     elif mode == "max_power" and tier == "local":
         tier, reason = "premium", f"{cls.reason}; task mode 'max power' prefers premium"
 
-    # 4-5. Premium guardrails + availability
+    # 4-5. Premium guardrails + availability.
+    # Premium tier is provider-agnostic: prefer Fable 5, fall back to OpenAI.
     if tier == "premium":
-        fable5 = await registry.get("fable5").status()
-        if fable5.available:
+        premium_provider, premium_model, unavailable_detail = "", "", ""
+        for name in ("fable5", "openai"):
+            st = await registry.get(name).status()
+            if st.available:
+                premium_provider = name
+                premium_model = st.models[0] if st.models else ""
+                break
+            unavailable_detail = unavailable_detail or st.detail
+        if premium_provider:
             budget = float(get_setting(conn, "budget_monthly_usd", 20.0))
             spent = month_spend(conn)
             if spent >= budget:
@@ -103,15 +111,15 @@ async def route_request(
                 )
             elif get_setting(conn, "ask_before_premium", True) and not confirm_premium:
                 return RoutingDecision(
-                    "fable5", get_settings().fable5_model, cls.task_type,
+                    premium_provider, premium_model, cls.task_type,
                     f"{reason}; awaiting user approval for premium model",
                     "premium", needs_premium_confirmation=True,
                 )
             else:
-                return RoutingDecision("fable5", get_settings().fable5_model,
+                return RoutingDecision(premium_provider, premium_model,
                                        cls.task_type, reason, "premium")
         else:
-            reason = f"{reason}; premium unavailable ({fable5.detail}) → local"
+            reason = f"{reason}; premium unavailable ({unavailable_detail}) → local"
 
     provider, model, note = await _local_choice()
     return RoutingDecision(

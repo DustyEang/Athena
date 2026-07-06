@@ -3,9 +3,10 @@ speak is an honest stub until Piper is installed (see voice/pipeline.py)."""
 from __future__ import annotations
 
 import anyio
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException, Response, UploadFile
+from pydantic import BaseModel
 
-from ..voice.pipeline import get_stt, voice_status
+from ..voice.pipeline import get_stt, get_tts, voice_status
 
 router = APIRouter(tags=["voice"])
 
@@ -35,10 +36,26 @@ async def transcribe(audio: UploadFile):
     return {"text": text}
 
 
+class SpeakRequest(BaseModel):
+    text: str
+
+
+MAX_SPEAK_CHARS = 2000  # keep replies snappy; long text is trimmed at a sentence
+
+
 @router.post("/voice/speak")
-def speak():
+async def speak(req: SpeakRequest):
     status = voice_status()
     if not status["tts"]["available"]:
         raise HTTPException(501, "TTS not configured. " + status["tts"]["detail"])
-    # TODO(cursor): accept {"text": ...}, return audio/wav via PiperTTS
-    raise HTTPException(501, "TTS provider detected but pipeline not wired yet (v1 stub).")
+    text = req.text.strip()
+    if not text:
+        raise HTTPException(400, "Nothing to say.")
+    if len(text) > MAX_SPEAK_CHARS:
+        cut = text[:MAX_SPEAK_CHARS]
+        text = cut[: cut.rfind(".") + 1] or cut
+    try:
+        wav = await anyio.to_thread.run_sync(get_tts().synthesize, text)
+    except Exception as exc:
+        raise HTTPException(500, f"Speech synthesis failed: {exc}") from exc
+    return Response(content=wav, media_type="audio/wav")

@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     fable5_api_key: str = ""
     fable5_model: str = "claude-fable-5"
     fable5_api_url: str = "https://api.anthropic.com/v1/messages"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-5.4-mini"
+    openai_api_url: str = "https://api.openai.com/v1/chat/completions"
+    openai_extra_models: list[str] = ["gpt-5.5", "gpt-5.4-nano", "gpt-4o-mini"]
 
     # Future remote Athena server (stub in v1)
     server_url: str = ""

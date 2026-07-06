@@ -7,15 +7,17 @@ from .base import ModelProvider, ProviderStatus
 from .fable5 import Fable5Provider
 from .mock import MockProvider
 from .ollama import OllamaProvider
+from .openai import OpenAIProvider
 from .remote import RemoteAthenaProvider
 
 
 class ProviderRegistry:
     def __init__(self) -> None:
         self._providers: dict[str, ModelProvider] = {}
-        for provider in (MockProvider(), OllamaProvider(), Fable5Provider(), RemoteAthenaProvider()):
+        for provider in (MockProvider(), OllamaProvider(), Fable5Provider(),
+                         OpenAIProvider(), RemoteAthenaProvider()):
             self._providers[provider.name] = provider
-        # TODO(cursor): register OpenAI / Gemini / custom-HTTP providers here.
+        # TODO(cursor): register Gemini / custom-HTTP providers here.
 
     def get(self, name: str) -> ModelProvider | None:
         return self._providers.get(name)

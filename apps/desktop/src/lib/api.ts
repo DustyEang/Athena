@@ -78,6 +78,20 @@ export const api = {
   voiceStatus: () => http<Record<string, any>>("/voice/status"),
 };
 
+/** Text-to-speech: returns a playable WAV blob of Athena saying the text. */
+export async function speakText(text: string): Promise<Blob> {
+  const res = await fetch(`${API_BASE}/voice/speak`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Speech failed (${res.status}): ${body.slice(0, 200)}`);
+  }
+  return res.blob();
+}
+
 /** Push-to-talk: send recorded audio, get the transcript back. */
 export async function transcribeAudio(blob: Blob): Promise<string> {
   const form = new FormData();

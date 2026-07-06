@@ -82,7 +82,63 @@ def get_stt() -> FasterWhisperSTT:
     return _stt_singleton
 
 
-# TODO(cursor): PiperTTS(TTSProvider) — subprocess to piper.exe with a voice model.
+def find_piper() -> str | None:
+    """Locate piper.exe: env override → repo tools/ → PATH."""
+    env_path = os.environ.get("ATHENA_PIPER_PATH")
+    if env_path and Path(env_path).is_file():
+        return env_path
+    bundled = PIPER_DIR / "piper.exe"
+    if bundled.is_file():
+        return str(bundled)
+    return shutil.which("piper")
+
+
+def find_piper_voice() -> str | None:
+    """Locate a voice model: env override → first .onnx in tools/piper/voices."""
+    env_voice = os.environ.get("ATHENA_PIPER_VOICE")
+    if env_voice and Path(env_voice).is_file():
+        return env_voice
+    voices_dir = PIPER_DIR / "voices"
+    if voices_dir.is_dir():
+        for onnx in sorted(voices_dir.glob("*.onnx")):
+            return str(onnx)
+    return None
+
+
+class PiperTTS(TTSProvider):
+    """Local TTS via the Piper binary. Writes to a temp WAV and returns bytes."""
+
+    def __init__(self, piper_path: str, voice_path: str) -> None:
+        self.piper_path = piper_path
+        self.voice_path = voice_path
+
+    def synthesize(self, text: str) -> bytes:
+        with tempfile.TemporaryDirectory() as tmp:
+            out_path = Path(tmp) / "speech.wav"
+            proc = subprocess.run(
+                [self.piper_path, "--model", self.voice_path,
+                 "--output_file", str(out_path)],
+                input=text.encode("utf-8"),
+                capture_output=True,
+                timeout=120,
+            )
+            if proc.returncode != 0 or not out_path.is_file():
+                raise RuntimeError(
+                    f"piper failed (rc={proc.returncode}): "
+                    f"{proc.stderr.decode('utf-8', 'replace')[-300:]}"
+                )
+            return out_path.read_bytes()
+
+
+def get_tts() -> PiperTTS:
+    """Fresh instance each call — piper is a subprocess, nothing to cache."""
+    piper = find_piper()
+    voice = find_piper_voice()
+    if not piper or not voice:
+        raise RuntimeError("Piper TTS not configured (binary or voice model missing).")
+    return PiperTTS(piper, voice)
+
+
 # TODO(cursor): ElevenLabsTTS(TTSProvider) — network_access permission, API key from env.
 # TODO(cursor): WakeWordListener — openwakeword loop, logs detections for the
 #               "wake-word reliability" screen, toggled by wake_word_enabled setting.
@@ -99,13 +155,14 @@ def voice_status() -> dict[str, Any]:
     """Availability report for the health screen and voice panel."""
     stt = _module_available("faster_whisper")
     wake = _module_available("openwakeword")
-    piper = shutil.which("piper") is not None
+    piper = find_piper() is not None and find_piper_voice() is not None
     return {
         "configured": stt or piper,
         "stt": {"provider": "faster-whisper", "available": stt,
                 "detail": "" if stt else "pip install faster-whisper"},
         "tts": {"provider": "piper", "available": piper,
-                "detail": "" if piper else "Install Piper and add to PATH"},
+                "detail": "" if piper else
+                "Put piper.exe in tools/piper/ and a voice .onnx in tools/piper/voices/"},
         "wake_word": {"provider": "openwakeword", "available": wake,
                       "detail": "" if wake else "pip install openwakeword",
                       "phrase": "Athena"},

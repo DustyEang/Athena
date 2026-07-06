@@ -11,6 +11,11 @@ from ..db import new_id
 PRICES: dict[str, tuple[float, float]] = {
     "claude-fable-5": (18.0, 90.0),   # placeholder — verify against real pricing
     "athena-mock": (0.0, 0.0),
+    # OpenAI — estimates from the gpt-5 family price points; verify current
+    "gpt-5.5": (1.25, 10.0),
+    "gpt-5.4-mini": (0.25, 2.0),
+    "gpt-5.4-nano": (0.05, 0.4),
+    "gpt-4o-mini": (0.15, 0.6),
 }
 LOCAL_PROVIDERS = {"ollama", "mock", "athena-server"}
 
