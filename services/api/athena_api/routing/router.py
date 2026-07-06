@@ -122,6 +122,26 @@ async def route_request(
             reason = f"{reason}; premium unavailable ({unavailable_detail}) → local"
 
     provider, model, note = await _local_choice()
+    if provider == "mock":
+        # Local brain is down — a real premium brain beats the mock, but the
+        # usual guardrails (budget, ask-before-premium) still apply.
+        budget = float(get_setting(conn, "budget_monthly_usd", 20.0))
+        if month_spend(conn) < budget:
+            for name in ("fable5", "openai"):
+                st = await registry.get(name).status()
+                if not st.available:
+                    continue
+                p_model = st.models[0] if st.models else ""
+                if get_setting(conn, "ask_before_premium", True) and not confirm_premium:
+                    return RoutingDecision(
+                        name, p_model, cls.task_type,
+                        f"{reason}; Ollama unavailable — premium fallback awaiting approval",
+                        "premium", needs_premium_confirmation=True,
+                    )
+                return RoutingDecision(
+                    name, p_model, cls.task_type,
+                    f"{reason}; Ollama unavailable → {name} fallback", "premium",
+                )
     return RoutingDecision(
         provider, model, cls.task_type, f"{reason}; using {note}",
         "local" if provider == "ollama" else "mock",

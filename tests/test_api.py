@@ -19,6 +19,7 @@ sys.path.insert(0, str(REPO / "services" / "api"))
 _tmp = tempfile.mkdtemp(prefix="athena-test-")
 os.environ["ATHENA_DATA_DIR"] = _tmp
 os.environ["ATHENA_FABLE5_API_KEY"] = ""       # force degraded mode
+os.environ["ATHENA_OPENAI_API_KEY"] = ""       # force degraded mode
 os.environ["ATHENA_OLLAMA_URL"] = "http://localhost:1"  # unreachable on purpose
 
 from fastapi.testclient import TestClient  # noqa: E402

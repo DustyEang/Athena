@@ -23,13 +23,10 @@ from .base import (
 _DIRECTIVE = re.compile(r"!tool\s+([\w-]+)\.([\w-]+)\s*(\{.*\})?", re.DOTALL)
 
 
-def _mock_reply(last_user: str) -> str:
+def _mock_reply(last_user: str) -> str:  # noqa: ARG001 — signature kept for tests
     return (
-        "⚠ Mock provider response — no real model is connected yet.\n\n"
-        f'You said: "{last_user[:400]}"\n\n'
-        "To get real answers: start Ollama (`ollama serve`, then pull a model), "
-        "or add a Fable 5 API key in Settings. Athena will route to real "
-        "providers automatically once one is available."
+        "I can't reach any of my brains right now — start Ollama or add an "
+        "API key in Settings and I'll answer for real."
     )
 
 
