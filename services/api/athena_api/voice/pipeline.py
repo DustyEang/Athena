@@ -17,9 +17,16 @@ POST audio bytes to /api/voice/transcribe → text → normal chat flow.
 from __future__ import annotations
 
 import importlib.util
+import os
 import shutil
+import subprocess
+import tempfile
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+PIPER_DIR = REPO_ROOT / "tools" / "piper"
 
 
 class STTProvider(ABC):

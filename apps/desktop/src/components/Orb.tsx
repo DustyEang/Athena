@@ -12,7 +12,12 @@ export default function Orb({ state, size = 96 }: { state: OrbState; size?: numb
         className={`orb orb-${state}`}
         style={{ width: size, height: size }}
         aria-label={`Athena is ${state}`}
-      />
+      >
+        <div className="orb-face">
+          <div className="orb-eye orb-eye-left" />
+          <div className="orb-eye orb-eye-right" />
+        </div>
+      </div>
       {LABEL[state] && (
         <span className="text-xs tracking-widest uppercase" style={{ color: "var(--athena-dim)" }}>
           {LABEL[state]}

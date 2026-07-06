@@ -96,7 +96,73 @@ body {
   to { transform: rotate(14deg) scale(1.08); opacity: 1; }
 }
 
+/* ---------- The face: EVE-style eyes ----------
+   Two glowing capsule eyes inside the orb. States reuse the orb classes:
+   idle = soft blink, listening = wide awake, thinking = looking around,
+   speaking = happy squint. `rotate` (standalone property) keeps the
+   friendly tilt while `transform` animates blink/scan/squint on top. */
+.orb-face {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16%;
+}
+.orb-eye {
+  width: 16%;
+  height: 30%;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 32%,
+    #ffffff 0%, #e6faff 38%, #9be4ff 72%, rgba(125, 211, 252, 0.55) 100%);
+  box-shadow:
+    0 0 8px 2px rgba(190, 240, 255, 0.9),
+    0 0 20px 5px rgba(56, 189, 248, 0.5);
+  animation: eye-blink 4.6s ease-in-out infinite;
+}
+.orb-eye-left { rotate: -10deg; }
+.orb-eye-right { rotate: 10deg; animation-delay: 0.05s; }
+
+.orb-listening .orb-eye {
+  height: 36%;
+  animation: none; /* wide awake — no blinking while she listens */
+  background: radial-gradient(circle at 50% 32%,
+    #ffffff 0%, #e8fffb 38%, #8ef2dd 72%, rgba(94, 234, 212, 0.55) 100%);
+  box-shadow:
+    0 0 8px 2px rgba(200, 255, 245, 0.95),
+    0 0 22px 6px rgba(94, 234, 212, 0.55);
+}
+.orb-thinking .orb-eye {
+  height: 24%; /* slightly narrowed — concentrating */
+  animation: eye-scan 2.4s ease-in-out infinite;
+  background: radial-gradient(circle at 50% 32%,
+    #ffffff 0%, #f3ecff 38%, #cdb6ff 72%, rgba(167, 139, 250, 0.55) 100%);
+  box-shadow:
+    0 0 8px 2px rgba(230, 215, 255, 0.9),
+    0 0 20px 5px rgba(167, 139, 250, 0.55);
+}
+.orb-speaking .orb-eye {
+  height: 18%;
+  border-radius: 60% 60% 40% 40% / 100% 100% 25% 25%; /* upward smile-arcs */
+  animation: eye-happy 0.55s ease-in-out infinite;
+}
+
+@keyframes eye-blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  94%, 96% { transform: scaleY(0.08); }
+}
+@keyframes eye-scan {
+  0%, 100% { transform: translate(0, -8%); }
+  28% { transform: translate(-24%, -18%); }
+  62% { transform: translate(22%, -12%); }
+}
+@keyframes eye-happy {
+  0%, 100% { transform: scaleY(0.85); }
+  50% { transform: scaleY(1.1); }
+}
+
 /* Reduced motion: keep the presence, drop the animation */
 @media (prefers-reduced-motion: reduce) {
-  .orb, .orb::before, .orb::after { animation: none; }
+  .orb, .orb::before, .orb::after, .orb-eye { animation: none; }
 }

@@ -25,6 +25,9 @@ data/index/
 .env.local
 *.key
 
+# Local tool binaries (piper.exe + voice models — downloaded, not versioned)
+tools/
+
 # OS / editor
 .DS_Store
 Thumbs.db
